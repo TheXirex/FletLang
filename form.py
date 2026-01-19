@@ -1,4 +1,3 @@
-import re
 import pandas as pd
 from deep_translator import GoogleTranslator
 import detectlanguage
@@ -6,17 +5,18 @@ import flet as ft
 
 detectlanguage.configuration.api_key = "026adcb6587baa3b9f2afc05e991d327"
 
-class WordForm(ft.UserControl):
-    def __init__(self):
+class WordForm(ft.Column):
+    def __init__(self, page_ref: ft.Page):
         super().__init__()
-
+        self._page_ref = page_ref
         self.filepath = 'words.csv'
         
         self.word = ft.TextField(
             label="Word/phrase",
             on_change=self.word_changed,
             border_radius=10,
-            border_color=ft.colors.WHITE30
+            border_color=ft.Colors.WHITE30,
+            width=400
         )
         self.translate_button = ft.ElevatedButton(
             'Translate',
@@ -26,7 +26,8 @@ class WordForm(ft.UserControl):
             read_only=True,
             label="Translation",
             border_radius=10,
-            border_color=ft.colors.WHITE30
+            border_color=ft.Colors.WHITE30,
+            width=400
         )
         self.save_button = ft.ElevatedButton(
             'Save',
@@ -45,10 +46,21 @@ class WordForm(ft.UserControl):
             'unrec': False
         }
 
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.alignment = ft.MainAxisAlignment.CENTER
+        self.spacing = 15
+        self.controls = [
+            self.word,
+            self.translate_button,
+            self.translated_word,
+            self.save_button
+        ]
+
     def show_error(self, text):
-        self.page.dialog = ft.SnackBar(content=ft.Text(text), bgcolor=ft.colors.TEAL_400)
-        self.page.dialog.open = True
-        self.page.update()
+        snack = ft.SnackBar(content=ft.Text(text), bgcolor=ft.Colors.TEAL_400)
+        self._page_ref.overlay.append(snack)
+        snack.open = True
+        self._page_ref.update()
 
     def word_changed(self, e):
         self.save_button.disabled = True
@@ -125,18 +137,3 @@ class WordForm(ft.UserControl):
             self.show_error(f'The word "{self.word.value}" was added to the dictionary.')
 
         self.update()
-
-    def build(self):
-        return ft.Container(
-            ft.Column(
-                controls=[
-                    ft.Container(height=10),
-                    self.word,
-                    self.translate_button,
-                    ft.Container(height=10),
-                    self.translated_word,
-                    self.save_button
-                ],
-                horizontal_alignment='center'
-            )
-        )

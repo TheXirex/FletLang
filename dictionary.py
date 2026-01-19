@@ -1,18 +1,32 @@
 import flet as ft
 import pandas as pd
 
-class Dictionary(ft.UserControl):
-    def __init__(self):
+class Dictionary(ft.Column):
+    def __init__(self, page_ref: ft.Page):
         super().__init__()
-        
+        self._page_ref = page_ref
         self.filepath = 'words.csv'
-        self.words_list = ft.Column(controls=[])
+        self.words_list = ft.Column(controls=[], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         self.search_field = ft.TextField(
-            hint_text='Enter a word to search...',
+            hint_text='Search words...',
             border_radius=10,
             on_change=self.on_search_but,
-            border_color=ft.colors.WHITE30
+            border_color=ft.Colors.TEAL_400,
+            focused_border_color=ft.Colors.TEAL_200,
+            prefix_icon=ft.Icons.SEARCH,
+            text_size=16,
+            content_padding=ft.Padding.symmetric(horizontal=15, vertical=10),
+            expand=True
         )
+        
+        self.display_words()
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.controls = [
+            ft.Container(height=15),
+            self.search_field,
+            ft.Container(height=15),
+            self.words_list
+        ]
 
     def delete_word(self, data_index, control_index, with_search):
         data = pd.read_csv(self.filepath)
@@ -34,19 +48,19 @@ class Dictionary(ft.UserControl):
                     ft.Row(
                         controls=[
                             ft.Container(
-                                ft.Text(data.iloc[i]['en'], weight=ft.FontWeight.W_600),
-                                alignment=ft.alignment.center,
+                                ft.Text(data.iloc[i]['en'], weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
+                                alignment=ft.Alignment.CENTER,
                                 expand=5
                             ),
                             ft.Container(
-                                ft.Text(data.iloc[i]['uk'], weight=ft.FontWeight.W_600),
-                                alignment=ft.alignment.center,
+                                ft.Text(data.iloc[i]['uk'], weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
+                                alignment=ft.Alignment.CENTER,
                                 expand=5
                             ),
                             ft.Container(
                                 ft.IconButton(
-                                    icon=ft.icons.DELETE_FOREVER,
-                                    icon_color='red',
+                                    icon=ft.Icons.DELETE_FOREVER,
+                                    icon_color=ft.Colors.RED,
                                     on_click=lambda e, data_index=i, control_index=i, with_search=False:
                                     self.delete_word(data_index, control_index, with_search)
                                 ),
@@ -54,9 +68,9 @@ class Dictionary(ft.UserControl):
                             )
                         ],
                     ),
-                    border=ft.border.all(2, ft.colors.BLACK26),
-                    padding=ft.padding.all(10),
-                    alignment=ft.alignment.center,
+                    border=ft.border.all(2, ft.Colors.WHITE30),
+                    padding=ft.Padding.symmetric(horizontal=10, vertical=0),
+                    alignment=ft.Alignment.CENTER,
                     border_radius=10
                 )
             )
@@ -84,19 +98,19 @@ class Dictionary(ft.UserControl):
                             ft.Row(
                                 controls=[
                                     ft.Container(
-                                        ft.Text(data.iloc[i]['en'], weight=ft.FontWeight.W_600),
-                                        alignment=ft.alignment.center,
+                                        ft.Text(data.iloc[i]['en'], weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
+                                        alignment=ft.Alignment.CENTER,
                                         expand=5
                                     ),
                                     ft.Container(
-                                        ft.Text(data.iloc[i]['uk'], weight=ft.FontWeight.W_600),
-                                        alignment=ft.alignment.center,
+                                        ft.Text(data.iloc[i]['uk'], weight=ft.FontWeight.W_600, text_align=ft.TextAlign.CENTER),
+                                        alignment=ft.Alignment.CENTER,
                                         expand=5
                                     ),
                                     ft.Container(
                                         ft.IconButton(
-                                            icon=ft.icons.DELETE_FOREVER,
-                                            icon_color=ft.colors.RED,
+                                            icon=ft.Icons.DELETE_FOREVER,
+                                            icon_color=ft.Colors.RED,
                                             on_click=lambda e, data_index=i, control_index=ind, with_search=True:
                                             self.delete_word(data_index, control_index, with_search)
                                         ),
@@ -104,16 +118,12 @@ class Dictionary(ft.UserControl):
                                     )
                                 ],
                             ),
-                            border=ft.border.all(2, ft.colors.BLACK26),
-                            padding=ft.padding.all(10),
-                            alignment=ft.alignment.center,
+                            border=ft.border.all(2, ft.Colors.WHITE30),
+                            padding=ft.Padding.symmetric(horizontal=10, vertical=2),
+                            alignment=ft.Alignment.CENTER,
                             border_radius=10
                         )
                     )
                     ind += 1
             self.words_list.controls = displayed_rows
         self.update()
-
-    def build(self):
-        self.display_words()
-        return ft.Column(controls=[ft.Container(height=10), self.search_field, ft.Container(height=10), self.words_list])
