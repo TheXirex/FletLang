@@ -1,11 +1,11 @@
 import flet as ft
-import pandas as pd
+from data_manager import DataManager
 
 class Dictionary(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
-        self.filepath = 'words.csv'
+        self.data_manager = DataManager('words.csv')
         self.words_list = ft.Column(controls=[], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         self.search_field = ft.TextField(
             hint_text='Search words...',
@@ -29,9 +29,7 @@ class Dictionary(ft.Column):
         ]
 
     def delete_word(self, data_index, control_index, with_search):
-        data = pd.read_csv(self.filepath)
-        data = data.drop(data_index)
-        data.to_csv(self.filepath, index=False)
+        self.data_manager.delete_word(data_index)
         del self.words_list.controls[control_index]
         if with_search:
             self.activate_search()
@@ -40,7 +38,7 @@ class Dictionary(ft.Column):
         self.update()
 
     def display_words(self):
-        data = pd.read_csv(self.filepath)
+        data = self.data_manager.read_data()
         displayed_rows = []
         for i in range(len(data)):
             displayed_rows.append(
@@ -83,7 +81,7 @@ class Dictionary(ft.Column):
         if self.search_field.value == '':
             self.display_words()
         else:
-            data = pd.read_csv(self.filepath)
+            data = self.data_manager.read_data()
             displayed_rows = []
             ind = 0
             for i in range(len(data)):

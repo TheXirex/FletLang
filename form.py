@@ -1,8 +1,9 @@
 import os
-import pandas as pd
 from deep_translator import GoogleTranslator
 import detectlanguage
 import flet as ft
+from utils import show_error
+from data_manager import DataManager
 
 detectlanguage.configuration.api_key = os.getenv('DETECTLANGUAGE_API_KEY')
 
@@ -10,7 +11,7 @@ class WordForm(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
-        self.filepath = 'words.csv'
+        self.data_manager = DataManager('words.csv')
         
         self.word = ft.TextField(
             label="Word/phrase",
@@ -57,12 +58,6 @@ class WordForm(ft.Column):
             self.save_button
         ]
 
-    def show_error(self, text):
-        snack = ft.SnackBar(content=ft.Text(text), bgcolor=ft.Colors.TEAL_400)
-        self._page_ref.overlay.append(snack)
-        snack.open = True
-        self._page_ref.update()
-
     def word_changed(self, e):
         self.save_button.disabled = True
         self.translated_word.value = ''
@@ -75,7 +70,7 @@ class WordForm(ft.Column):
     def change_lang(self):
         translation = self.translate_word('ru', 'uk', self.word.value)
         if translation != self.word.value:
-            self.show_error(f"Word '{self.word.value}' was replaced by '{translation}'")
+            show_error(self._page_ref, f"Word '{self.word.value}' was replaced by '{translation}'")
             self.word.value = translation
         self.update()
     
@@ -109,32 +104,24 @@ class WordForm(ft.Column):
         translation = self.process_word()
         
         if self.state['empty'] or self.state['unlettered']:
-            self.show_error('Enter a word.')
+            show_error(self._page_ref, 'Enter a word.')
         elif self.word.value == translation:
-            self.show_error('The word cannot be translated.')
+            show_error(self._page_ref, 'The word cannot be translated.')
         elif self.state['undef_lang']:
-            self.show_error('Use English or Ukrainian languages.')
+            show_error(self._page_ref, 'Use English or Ukrainian languages.')
         else:
             self.translated_word.value = translation
             self.save_button.disabled = False
         self.update()
 
     def save_word(self, e):
-        self.data = pd.read_csv(self.filepath)
+        en_word = self.translated_word.value if self.target_language == 'en' else self.word.value
+        uk_word = self.word.value if self.target_language == 'en' else self.translated_word.value
         
-        if self.word.value.lower() in self.data[self.source_language].values and \
-            self.translated_word.value.lower() in self.data[self.target_language].values:
-            self.show_error('Word is already in the dictionary.')
-            
-        else:
-            en_word = self.translated_word.value.lower() if self.target_language == 'en' else self.word.value.lower()
-            uk_word = self.word.value.lower() if self.target_language == 'en' else self.translated_word.value.lower()
-
-            new_data = pd.DataFrame({'en': [en_word], 'uk': [uk_word]})
-            self.data = pd.concat([self.data, new_data], ignore_index=True)
-            self.data.to_csv(self.filepath, index=False)
-            
+        if self.data_manager.add_word(en_word, uk_word):
             self.save_button.disabled = True
-            self.show_error(f'The word "{self.word.value}" was added to the dictionary.')
+            show_error(self._page_ref, f'The word "{self.word.value}" was added to the dictionary.')
+        else:
+            show_error(self._page_ref, 'Word is already in the dictionary.')
 
         self.update()

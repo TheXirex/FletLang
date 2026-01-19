@@ -1,10 +1,12 @@
 import flet as ft
-import pandas as pd
+from utils import show_error, validate_word_input
+from data_manager import DataManager
 
 class Quiz(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
+        self.data_manager = DataManager('words.csv')
 
         self.language = ft.Dropdown(
             options=[
@@ -76,12 +78,6 @@ class Quiz(ft.Column):
             self.answer
         ]
 
-    def show_error(self, text):
-        snack = ft.SnackBar(content=ft.Text(text), bgcolor=ft.Colors.TEAL_400)
-        self._page_ref.overlay.append(snack)
-        snack.open = True
-        self._page_ref.update()
-
     def refresh(self, e):
         self.word.value = ''
         self.answer_icon.icon, self.answer_icon.color = ft.Icons.QUESTION_MARK, ft.Colors.WHITE
@@ -91,8 +87,9 @@ class Quiz(ft.Column):
     def check_answer(self, e):
         self.word.value = self.word.value.strip().lower()
 
-        if not self.word.value or all(not char.isalpha() for char in self.word.value):
-            self.show_error('Enter a word.')
+        is_valid, error_msg = validate_word_input(self.word.value)
+        if not is_valid:
+            show_error(self._page_ref, error_msg)
         else:
             if self.word.value in self.answers:
                 self.answer_icon.icon, self.answer_icon.color = ft.Icons.CHECK, ft.Colors.GREEN
@@ -113,16 +110,10 @@ class Quiz(ft.Column):
 
     def display_quiz(self):
         self.answer.visible = False
-        data = pd.read_csv('words.csv')
-        while True:
-            random_word = data.sample()
-            if len(random_word['en'].values[0]) <= 28 and len(random_word['uk'].values[0]) <= 28:
-                break
+        random_word = self.data_manager.get_random_word()
         
-        self.quest.value = random_word['en'].values[0] if self.language.value == 'EN' else random_word['uk'].values[0]
-        if self.language.value == 'EN':
-            self.answers = list(data[data['en'] == self.quest.value]['uk'].values)
-        else:
-            self.answers = list(data[data['uk'] == self.quest.value]['en'].values)
+        self.quest.value = random_word['en'] if self.language.value == 'EN' else random_word['uk']
+        language = 'en' if self.language.value == 'EN' else 'uk'
+        self.answers = self.data_manager.get_translations(self.quest.value, language)
         
         self.answer.value = ' / '.join(self.answers)
