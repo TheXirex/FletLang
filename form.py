@@ -1,9 +1,10 @@
+import os
 import pandas as pd
 from deep_translator import GoogleTranslator
 import detectlanguage
 import flet as ft
 
-detectlanguage.configuration.api_key = "026adcb6587baa3b9f2afc05e991d327"
+detectlanguage.configuration.api_key = os.getenv('DETECTLANGUAGE_API_KEY')
 
 class WordForm(ft.Column):
     def __init__(self, page_ref: ft.Page):
