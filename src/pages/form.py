@@ -3,7 +3,7 @@ from deep_translator import GoogleTranslator
 import detectlanguage
 import flet as ft
 from utils import show_error
-from data_manager import DataManager
+from src.data_manager.data_manager import DataManager
 
 detectlanguage.configuration.api_key = os.getenv('DETECTLANGUAGE_API_KEY')
 
@@ -11,7 +11,7 @@ class WordForm(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
-        self.data_manager = DataManager('words.csv')
+        self.data_manager = DataManager('data/words.csv')
         
         self.word = ft.TextField(
             label="Word/phrase",

@@ -1,11 +1,11 @@
 import flet as ft
-from data_manager import DataManager
+from src.data_manager.data_manager import DataManager
 
 class Dictionary(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
-        self.data_manager = DataManager('words.csv')
+        self.data_manager = DataManager('data/words.csv')
         self.words_list = ft.Column(controls=[], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         self.search_field = ft.TextField(
             hint_text='Search words...',

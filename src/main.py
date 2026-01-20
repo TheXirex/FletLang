@@ -1,7 +1,7 @@
 import flet as ft
-from form import WordForm
-from quiz import Quiz
-from dictionary import Dictionary
+from pages.form import WordForm
+from pages.quiz import Quiz
+from pages.dictionary import Dictionary
 
 def main(page: ft.Page):
     page.title = 'FletLang'

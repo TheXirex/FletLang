@@ -1,12 +1,12 @@
 import flet as ft
 from utils import show_error, validate_word_input
-from data_manager import DataManager
+from src.data_manager.data_manager import DataManager
 
 class Quiz(ft.Column):
     def __init__(self, page_ref: ft.Page):
         super().__init__()
         self._page_ref = page_ref
-        self.data_manager = DataManager('words.csv')
+        self.data_manager = DataManager('data/words.csv')
 
         self.language = ft.Dropdown(
             options=[
