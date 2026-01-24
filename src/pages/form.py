@@ -1,10 +1,12 @@
 import os
+from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
 import detectlanguage
 import flet as ft
 from utils import show_error
 from data_manager import DataManager
 
+load_dotenv()
 detectlanguage.configuration.api_key = os.getenv('DETECTLANGUAGE_API_KEY')
 
 class WordForm(ft.Column):
