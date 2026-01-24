@@ -3,7 +3,7 @@ from deep_translator import GoogleTranslator
 import detectlanguage
 import flet as ft
 from utils import show_error
-from src.data_manager.data_manager import DataManager
+from data_manager import DataManager
 
 detectlanguage.configuration.api_key = os.getenv('DETECTLANGUAGE_API_KEY')
 

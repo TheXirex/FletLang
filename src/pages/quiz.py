@@ -1,6 +1,6 @@
 import flet as ft
 from utils import show_error, validate_word_input
-from src.data_manager.data_manager import DataManager
+from data_manager import DataManager
 
 class Quiz(ft.Column):
     def __init__(self, page_ref: ft.Page):

@@ -1,5 +1,5 @@
 import flet as ft
-from src.data_manager.data_manager import DataManager
+from data_manager import DataManager
 
 class Dictionary(ft.Column):
     def __init__(self, page_ref: ft.Page):
