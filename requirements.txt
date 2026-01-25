@@ -1,5 +1,5 @@
-flet=0.80.1
-pandas=2.3.3
-deep-translator=1.11.4
-detectlanguage=2.0.0
-python-dotenv=1.0.0
+flet==0.80.1
+pandas==2.3.3
+deep-translator==1.11.4
+detectlanguage==2.0.0
+python-dotenv==1.0.0
