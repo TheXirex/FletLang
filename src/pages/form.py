@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from deep_translator import GoogleTranslator
 import detectlanguage
+from detectlanguage.exceptions import DetectLanguageError
 import flet as ft
 from utils import show_error
 from data_manager import DataManager
@@ -87,26 +88,41 @@ class WordForm(ft.Column):
             self.state['unlettered'] = True
             
         else:
-            self.source_language = detectlanguage.simple_detect(self.word.value)
-            print(self.source_language)
+            try:
+                self.source_language = detectlanguage.simple_detect(self.word.value)
+                print(self.source_language)
 
-            if self.source_language not in self.languages_list:
-                self.state['undef_lang'] = True
+                if self.source_language not in self.languages_list:
+                    self.state['undef_lang'] = True
 
-            elif self.source_language == 'ru':
-                self.change_lang()
-                self.source_language = 'uk'
-                self.target_language = 'en'
-                return self.translate_word(self.source_language, self.target_language, self.word.value)
-            else:
-                self.target_language = 'en' if self.source_language == 'uk' else 'uk'
-                return self.translate_word(self.source_language, self.target_language, self.word.value)
+                elif self.source_language == 'ru':
+                    self.change_lang()
+                    self.source_language = 'uk'
+                    self.target_language = 'en'
+                    return self.translate_word(self.source_language, self.target_language, self.word.value)
+                else:
+                    self.target_language = 'en' if self.source_language == 'uk' else 'uk'
+                    return self.translate_word(self.source_language, self.target_language, self.word.value)
+            except DetectLanguageError as e:
+                self.state['unrec'] = True
+                return None
                 
+    def check_api_key(self):
+        """Check if API key is set in .env file."""
+        api_key = os.getenv('DETECTLANGUAGE_API_KEY')
+        return api_key is not None and api_key.strip() != ''
+
     def translate_click(self, e):
+        if not self.check_api_key():
+            show_error(self._page_ref, 'API key is not configured. Please add DETECTLANGUAGE_API_KEY to .env file.')
+            return
+        
         translation = self.process_word()
         
         if self.state['empty'] or self.state['unlettered']:
             show_error(self._page_ref, 'Enter a word.')
+        elif self.state['unrec']:
+            show_error(self._page_ref, 'Invalid API key. Please check your DETECTLANGUAGE_API_KEY in .env file.')
         elif self.word.value == translation:
             show_error(self._page_ref, 'The word cannot be translated.')
         elif self.state['undef_lang']:
